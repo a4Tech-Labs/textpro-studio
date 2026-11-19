@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextPro Studio - Ultimate All-In-One Text Workspace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Feature Hub -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>TextPro <span>Studio</span></h2>
+                <span class="version-badge">PRO SUITE v2.0</span>
+            </div>
+
+            <nav class="nav-menu">
+                <p class="nav-category">CORE UTILITIES</p>
+                <button class="nav-btn active" onclick="switchTab('editor', this)">✍️ Main Text Editor</button>
+                <button class="nav-btn" onclick="switchTab('compare', this)">⚖️ Side-by-Side Compare</button>
+
+                <p class="nav-category">QUICK ACTIONS</p>
+                <button onclick="toUpperCase()">UPPERCASE</button>
+                <button onclick="toLowerCase()">lowercase</button>
+                <button onclick="toTitleCase()">Title Case</button>
+                <button onclick="removeExtraSpaces()">Clean Extra Spaces</button>
+                <button onclick="removeDuplicatesentences()">Remove Dupes</button>
+                <button onclick="extractEmails()">Extract Emails</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>100% Secure • Client-Side Processing</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            <!-- TAB 1: Main Text Editor -->
+            <section id="editorTab" class="tab-content active">
+                <div class="top-bar-header">
+                    <div>
+                        <h1>No need to waste your time formatting your text accros different websites-you've got all features in one place! 🚀</h1>
+                        <p>Clean, format, extract, convert to PDF, and compare your data instantly in a single professional workspace.</p>
+                    </div>
+                    <div class="quick-actions">
+                        <button onclick="copyText()" class="btn-success">📋 Copy Text</button>
+                        <button onclick="downloadText()" class="btn-secondary">💾 Download .TXT</button>
+                        <button onclick="exportPDF()" class="btn-primary">📄 Export PDF</button>
+                        <button onclick="clearText()" class="btn-danger">🗑️ Clear</button>
+                    </div>
+                </div>
+
+                <textarea id="textInput" placeholder="Paste your massive text, data sheets, or messy code here..."></textarea>
+                
+                <div class="stats-bar">
+                    <span>Words: <strong id="wordCount">0</strong></span>
+                    <span>Characters: <strong id="charCount">0</strong></span>
+                    <span>Sentences: <strong id="sentenceCount">0</strong></span>
+                    <span>Lines: <strong id="lineCount">0</strong></span>
+                </div>
+
+                <div class="replace-container">
+                    <input type="text" id="findInput" placeholder="Find word...">
+                    <input type="text" id="replaceInput" placeholder="Replace with...">
+                    <button onclick="findAndReplace()" class="btn-secondary">Replace All</button>
+                </div>
+            </section>
+
+            <!-- TAB 2: Side-by-Side Compare Tool -->
+            <section id="compareTab" class="tab-content">
+                <div class="top-bar-header">
+                    <div>
+                        <h1>Side-by-Side Text Comparison</h1>
+                        <p>Compare two versions of text to check for differences instantly.</p>
+                    </div>
+                    <button onclick="compareTexts()" class="btn-primary">Compare Texts</button>
+                </div>
+
+                <div class="compare-grid">
+                    <div class="compare-box">
+                        <label>Original Text</label>
+                        <textarea id="compareOriginal" placeholder="Paste original text here..."></textarea>
+                    </div>
+                    <div class="compare-box">
+                        <label>Modified Text</label>
+                        <textarea id="compareModified" placeholder="Paste modified text here..."></textarea>
+                    </div>
+                </div>
+
+                <div id="compareResult" class="compare-result-box">
+                    Status: Ready for comparison. Click "Compare Texts" above.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast">Action completed successfully!</div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const wordCount = document.getElementById('wordCount');
+        const charCount = document.getElementById('charCount');
+        const sentenceCount = document.getElementById('sentenceCount');
+        const lineCount = document.getElementById('lineCount');
+
+        textInput.addEventListener('input', updateStats);
+
+        function switchTab(tabName, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+            if (tabName === 'editor') {
+                document.getElementById('editorTab').classList.add('active');
+            } else if (tabName === 'compare') {
+                document.getElementById('compareTab').classList.add('active');
+            }
+            btnElement.classList.add('active');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function updateStats() {
+            const text = textInput.value;
+            charCount.innerText = text.length;
+            const words = text.trim() === '' ? [] : text.trim().split(/\s+/);
+            wordCount.innerText = words.length;
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            sentenceCount.innerText = sentences.length;
+            const lines = text === '' ? [] : text.split(/\r\n|\r|\n/);
+            lineCount.innerText = lines.length;
+        }
+
+        function toUpperCase() { textInput.value = textInput.value.toUpperCase(); updateStats(); }
+        function toLowerCase() { textInput.value = textInput.value.toLowerCase(); updateStats(); }
+        function toTitleCase() { textInput.value = textInput.value.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()); updateStats(); }
+        function removeExtraSpaces() { textInput.value = textInput.value.replace(/[ \t]+/g, ' ').replace(/\n\s*\n/g, '\n').trim(); updateStats(); showToast("Extra spaces cleaned!"); }
+        function removeDuplicates() { const lines = textInput.value.split('\n'); textInput.value = [...new Set(lines)].join('\n'); updateStats(); showToast("Duplicates removed!"); }
+        
+        function extractEmails() {
+            const emails = textInput.value.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
+            if (emails) {
+                textInput.value = [...new Set(emails)].join('\n');
+                updateStats();
+                showToast(`Extracted ${emails.length} email(s)!`);
+            } else { showToast("No emails found."); }
+        }
+
+        function findAndReplace() {
+            const f = document.getElementById('findInput').value, r = document.getElementById('replaceInput').value;
+            if (!f) { showToast("Enter a word to find!"); return; }
+            textInput.value = textInput.value.split(f).join(r);
+            updateStats();
+            showToast("Replaced successfully!");
+        }
+
+        function compareTexts() {
+            const orig = document.getElementById('compareOriginal').value;
+            const mod = document.getElementById('compareModified').value;
+            const resBox = document.getElementById('compareResult');
+            if (orig === mod) {
+                resBox.innerHTML = "<span style='color: #10b981;'>✨ Both texts are 100% identical! No differences found.</span>";
+            } else {
+                resBox.innerHTML = "<span style='color: #f59e0b;'>⚠️ Differences detected between the two texts.</span>";
+            }
+            showToast("Comparison complete!");
+        }
+
+        function copyText() { if (!textInput.value) return; navigator.clipboard.writeText(textInput.value); showToast("Copied to clipboard!"); }
+        
+        function downloadText() {
+            if (!textInput.value) return;
+            const blob = new Blob([textInput.value], { type: 'text/plain' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+            link.download = 'textpro-output.txt'; link.click(); showToast("Downloading file...");
+        }
+
+        function exportPDF() {
+            if (!textInput.value.trim()) {
+                showToast("Enter some text first to export as PDF!");
+                return;
+            }
+            const printWindow = window.open('', '', 'height=650,width=900');
+            printWindow.document.write('<html><head><title>TextPro Document</title>');
+            printWindow.document.write('<style>body { font-family: Arial, sans-serif; line-height: 1.6; padding: 40px; color: #111; white-space: pre-wrap; word-wrap: break-word; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(textInput.value.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+            showToast("Opening PDF exporter...");
+        }
+
+        function clearText() { textInput.value = ''; updateStats(); showToast("Cleared!"); }
+    </script>
+</body>
+</html>
